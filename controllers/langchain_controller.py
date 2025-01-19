@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException
 from langchain.chat_models import ChatOpenAI
 from models.prompt_request import PromptRequest
 from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain
+from langchain.chains import LLMChain, SequentialChain
 
 router = APIRouter()
 
@@ -39,7 +39,6 @@ async def get_langchain(request: PromptRequest):
 @router.post("/code-prompt")
 async def get_langchain_code_prompt():
     try:
-
         code_prompt = PromptTemplate(
             template="Write a very short {language} function that will {task}",
             input_variables=["language", "task"]
@@ -60,4 +59,46 @@ async def get_langchain_code_prompt():
         print("Error:", e)
         raise HTTPException(status_code=500, detail="An error occurred while processing the request.")
     
+
+@router.post("/code-prompt-with-tests")
+async def get_langchain_code_prompt_with_tests():
+    try:
+        code_prompt = PromptTemplate(
+            template="Write a very short {language} function that will {task}",
+            input_variables=["language", "task"]
+        )
+
+        test_prompt = PromptTemplate(
+            input_variables=["language", "code"],
+            template="Write a test for the following {language} code: \n{code}" 
+        )
+
+        code_chain = LLMChain(
+            llm=model,
+            prompt=code_prompt,
+            output_key="code"
+        )
+
+        test_chain = LLMChain(
+            llm=model, # same model can be used
+            prompt=test_prompt,
+            output_key="test"
+        )
+
+        
+        chain =  SequentialChain(
+            chains=[code_chain, test_chain],
+            input_variables=["task", "language"],
+            output_variables=["test", "code"]
+        )
+
+        result = chain({
+            "language": "python",
+            "task": "return a list of numbers"
+        })
+
+        return {"response": result}
+    except Exception as e:
+        print("Error:", e)
+        raise HTTPException(status_code=500, detail="An error occurred while processing the request.")
     
