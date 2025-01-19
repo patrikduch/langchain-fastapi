@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from langchain.chat_models import ChatOpenAI
+from models.prompt_request import PromptRequest
 
 router = APIRouter()
 
@@ -18,10 +19,6 @@ model = ChatOpenAI(
     openai_api_key=os.getenv("OPENAI_API_KEY")
 )
 
-
-class PromptRequest(BaseModel):
-    prompt: str
-
 @router.post("/")
 async def get_langchain(request: PromptRequest):
     try:
@@ -36,3 +33,4 @@ async def get_langchain(request: PromptRequest):
     except Exception as e:
         print("Error:", e)
         raise HTTPException(status_code=500, detail="An error occurred while processing the request.")
+    
