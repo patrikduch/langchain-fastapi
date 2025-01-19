@@ -1,6 +1,6 @@
 # fastapi-be-template
 
-# Project startup
+## Project startup
 
 Prepare virtualenv
 ```bash
@@ -25,6 +25,16 @@ Install the dependencies
 pip install -r requirements.txt
 ```
 
-Run the application
 
+Export local dependencies
+
+```bash
+pip freeze > requirements.txt
+```
+
+
+## Run the application
+
+```bash
 uvicorn main:app --reload
+```
