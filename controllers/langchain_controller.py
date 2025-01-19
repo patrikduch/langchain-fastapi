@@ -23,7 +23,7 @@ model = ChatOpenAI(
 @router.post("/")
 async def get_langchain(request: PromptRequest):
     try:
-        # Get the prompt from the request body
+       # Get the prompt from the request body
         prompt = request.prompt
 
         # Get the response from the model
@@ -35,6 +35,30 @@ async def get_langchain(request: PromptRequest):
         print("Error:", e)
         raise HTTPException(status_code=500, detail="An error occurred while processing the request.")
     
+
+@router.post("/")
+async def get_langchain_with_instruction(request: PromptRequest):
+    try:
+        # Define a static system message
+        SYSTEM_MESSAGE = "You are an very unhelpful bot. You answer every question with a terrible pun."
+
+        # Get the prompt from the request body
+        prompt = request.prompt
+
+        # Combine the system message with the user's prompt
+        combined_prompt = f"{SYSTEM_MESSAGE}\n\n{prompt}"
+
+        # Get the response from the model
+        response = await model.apredict(combined_prompt)
+        print("Response:", response)
+
+        return {"response": response}
+    except Exception as e:
+        print("Error:", e)
+        raise HTTPException(status_code=500, detail="An error occurred while processing the request.")
+    
+
+
 
 @router.post("/code-prompt")
 async def get_langchain_code_prompt():
