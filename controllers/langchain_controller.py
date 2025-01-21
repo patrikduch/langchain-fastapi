@@ -56,7 +56,7 @@ async def get_langchain_with_instructions(request: Request, prompt_request: Prom
         response = await model.apredict(combined_prompt)
         print("Response:", response)
 
-        return {"response": response}
+        return {"data": {"response": response}}
     except Exception as e:
         print("Error:", e)
         raise HTTPException(status_code=500, detail="An error occurred while processing the request.")

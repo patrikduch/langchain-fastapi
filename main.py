@@ -14,7 +14,8 @@ app = FastAPI()
 # Allowed origins
 origins = [
     "http://localhost",
-    "https://localhost:3000", 
+    "https://localhost:3000",
+    "https://assistifyai-fe-h2aveuccbsc2hfc0.westeurope-01.azurewebsites.net", 
 ]
 
 @app.exception_handler(RateLimitExceeded)
