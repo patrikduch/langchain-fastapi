@@ -64,7 +64,8 @@ async def get_langchain_with_instructions(request: Request, prompt_request: Prom
 
 
 @router.post("/code-prompt")
-async def get_langchain_code_prompt():
+@limiter.limit("5/minute")
+async def get_langchain_code_prompt(request: Request):
     try:
         code_prompt = PromptTemplate(
             template="Write a very short {language} function that will {task}",
@@ -88,7 +89,8 @@ async def get_langchain_code_prompt():
     
 
 @router.post("/code-prompt-with-tests")
-async def get_langchain_code_prompt_with_tests():
+@limiter.limit("5/minute")
+async def get_langchain_code_prompt_with_tests(request: Request):
     try:
         code_prompt = PromptTemplate(
             template="Write a very short {language} function that will {task}",
