@@ -20,27 +20,29 @@ model = ChatOpenAI(
     openai_api_key=os.getenv("OPENAI_API_KEY")
 )
 
-@router.post("/")
-async def get_langchain(request: PromptRequest):
-    try:
-       # Get the prompt from the request body
-        prompt = request.prompt
+#
+#
+#@router.post("/")
+#async def get_langchain(request: PromptRequest):
+#    try:
+#       # Get the prompt from the request body
+#        prompt = request.prompt
+#
+#        # Get the response from the model
+#        response = await model.apredict(prompt)
+#        print("Response:", response)
 
-        # Get the response from the model
-        response = await model.apredict(prompt)
-        print("Response:", response)
-
-        return {"response": response}
-    except Exception as e:
-        print("Error:", e)
-        raise HTTPException(status_code=500, detail="An error occurred while processing the request.")
+#        return {"response": response}
+#    except Exception as e:
+#        print("Error:", e)
+#        raise HTTPException(status_code=500, detail="An error occurred while processing the request.")
     
 
 @router.post("/")
-async def get_langchain_with_instruction(request: PromptRequest):
+async def get_langchain_with_instructions(request: PromptRequest):
     try:
         # Define a static system message
-        SYSTEM_MESSAGE = "You are an very unhelpful bot. You answer every question with a terrible pun."
+        SYSTEM_MESSAGE = "You are chatbot that will help patients for stomotology clinics. Enforce Czech Language."
 
         # Get the prompt from the request body
         prompt = request.prompt
@@ -109,7 +111,6 @@ async def get_langchain_code_prompt_with_tests():
             output_key="test"
         )
 
-        
         chain =  SequentialChain(
             chains=[code_chain, test_chain],
             input_variables=["task", "language"],
