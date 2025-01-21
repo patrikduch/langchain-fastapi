@@ -1,5 +1,12 @@
 # fastapi-be-template
 
+
+## Dependencies
+
+slowapi  - rate limiter
+
+
+
 ## Project startup
 
 Prepare virtualenv
@@ -38,3 +45,5 @@ pip freeze > requirements.txt
 ```bash
 uvicorn main:app --reload
 ```
+
+

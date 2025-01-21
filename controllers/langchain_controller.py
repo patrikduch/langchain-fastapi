@@ -1,10 +1,12 @@
 import os
 from dotenv import load_dotenv
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from langchain.chat_models import ChatOpenAI
 from models.prompt_request import PromptRequest
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain, SequentialChain
+
+from limiter import limiter
 
 router = APIRouter()
 
@@ -37,15 +39,15 @@ model = ChatOpenAI(
 #        print("Error:", e)
 #        raise HTTPException(status_code=500, detail="An error occurred while processing the request.")
     
-
 @router.post("/")
-async def get_langchain_with_instructions(request: PromptRequest):
+@limiter.limit("5/minute")
+async def get_langchain_with_instructions(request: Request, prompt_request: PromptRequest):
     try:
         # Define a static system message
-        SYSTEM_MESSAGE = "You are chatbot that will help patients for stomotology clinics. Enforce Czech Language."
+        SYSTEM_MESSAGE = "You are chatbot that will help patients for stomatology clinics. Enforce Czech Language."
 
         # Get the prompt from the request body
-        prompt = request.prompt
+        prompt = prompt_request.prompt
 
         # Combine the system message with the user's prompt
         combined_prompt = f"{SYSTEM_MESSAGE}\n\n{prompt}"
@@ -58,7 +60,6 @@ async def get_langchain_with_instructions(request: PromptRequest):
     except Exception as e:
         print("Error:", e)
         raise HTTPException(status_code=500, detail="An error occurred while processing the request.")
-    
 
 
 
