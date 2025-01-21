@@ -2,7 +2,7 @@ import os
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse  
-from controllers import langchain_controller
+from controllers import langchain_controller, user_controller
 
 from slowapi.errors import RateLimitExceeded
 
@@ -25,6 +25,7 @@ async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
 
 # Include routers from different controllers
 app.include_router(langchain_controller.router, prefix="/langchain", tags=["LangChain"])
+app.include_router(user_controller.router, prefix="/users", tags=["Users"])
 
 
 # Add CORS middleware
