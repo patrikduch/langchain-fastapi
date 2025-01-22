@@ -63,9 +63,3 @@ async def log_requests(request: Request, call_next):
 async def checkHealth():
     logger.info("Health check endpoint was accessed.")
     return {"message": "healthy"}
-
-@app.get("/env")
-@limiter.limit("5/minute")
-async def env_variables(request: Request):
-    logger.info("Environment variables endpoint was accessed.")
-    return {"DEBUG": DEBUG}
