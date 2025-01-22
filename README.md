@@ -6,6 +6,9 @@
 slowapi  - rate limiter
 pymongo  - MongoDB access
 
+python-jose
+passlib
+
 
 ## Project startup
 
@@ -46,4 +49,6 @@ pip freeze > requirements.txt
 uvicorn main:app --reload
 ```
 
+
+uvicorn main:app --reload --log-level debug
 

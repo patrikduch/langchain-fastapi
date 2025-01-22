@@ -1,9 +1,11 @@
+import logging
 import os
 from typing import List
 from dotenv import load_dotenv
 from fastapi import HTTPException
 from pymongo import MongoClient
 from models.requests.user_create_request import UserCreateRequest
+from models.requests.user_register_request import UserRegisterRequest
 from models.responses.user_response import UserResponse
 from pymongo.errors import ConnectionFailure
 
@@ -11,6 +13,11 @@ load_dotenv()  # Load environment variables from .env file
 
 # MongoDB Atlas connection
 MONGO_URI = os.getenv("MONGO_URI")
+
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class UserService:
 
@@ -67,3 +74,33 @@ class UserService:
             name=new_user["name"],
             email=new_user["email"]
         )
+    
+
+    @staticmethod
+    def register_user(user: UserRegisterRequest) -> dict:
+        logger = logging.getLogger("register_user")
+        try:
+            logger.info(f"Attempting to register user with email: {user.email}")
+            
+            existing_user = UserService.users_collection.find_one({"email": user.email})
+            if existing_user:
+                logger.warning(f"Registration failed: Email {user.email} already exists")
+                raise ValueError("Email already exists")
+            
+            user_data = {
+                "name": user.username,
+                "email": user.email,
+                "password": user.password
+            }
+            result = UserService.users_collection.insert_one(user_data)
+            
+            logger.info(f"User registered successfully: {user.email}")
+            return {"id": str(result.inserted_id), "name": user.username, "email": user.email}
+        
+        except ValueError as ve:
+            logger.error(f"ValueError: {ve}")
+            raise HTTPException(status_code=400, detail=str(ve))
+        
+        except Exception as e:
+            logger.exception("An unexpected error occurred during registration")
+            raise HTTPException(status_code=500, detail="An error occurred while registering the user")
