@@ -4,7 +4,7 @@
 ## Dependencies
 
 slowapi  - rate limiter
-
+pymongo  - MongoDB access
 
 
 ## Project startup
