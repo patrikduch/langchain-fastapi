@@ -1,11 +1,12 @@
 from datetime import datetime, timedelta
+import os
 from typing import Optional
+from dotenv import load_dotenv
 from jose import JWTError, jwt
 from fastapi import HTTPException, status
 
-# Constants for JWT
-SECRET_KEY = "your_secret_key_here"  # Replace with a strong secret key
-ALGORITHM = "HS256"
+load_dotenv()  # Load environment variables from .env file
+
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 class TokenService:
@@ -20,7 +21,7 @@ class TokenService:
         to_encode = data.copy()
         expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         to_encode.update({"exp": expire})
-        encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+        encoded_jwt = jwt.encode(to_encode, os.getenv("SECRET_KEY"), algorithm=os.getenv("ALGORITHM"))
         return encoded_jwt
 
     @staticmethod
@@ -32,7 +33,7 @@ class TokenService:
         :return: Decoded token data if valid, raises an exception if invalid
         """
         try:
-            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            payload = jwt.decode(token, os.getenv("SECRET_KEY"), algorithm=os.getenv("ALGORITHM"))
             return payload
         except JWTError as e:
             raise HTTPException(

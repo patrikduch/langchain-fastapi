@@ -8,6 +8,7 @@ pymongo  - MongoDB access
 
 python-jose
 passlib
+PyJWT
 
 
 ## Project startup

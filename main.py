@@ -1,11 +1,15 @@
 import logging
 import os
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from controllers import auth_controller, langchain_controller, user_controller
 from slowapi.errors import RateLimitExceeded
 from limiter import limiter
+from fastapi.openapi.utils import get_openapi
+
+from security import validate_jwt
 
 # Configure Logging
 logging.basicConfig(
@@ -39,10 +43,53 @@ async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
     logger.warning(f"Rate limit exceeded for {request.url}: {exc}")
     return PlainTextResponse(str(exc), status_code=429)
 
+
+
+# Define the HTTP Bearer dependency
+http_bearer = HTTPBearer()
+
+
+
+
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+
+    # Generate OpenAPI schema
+    openapi_schema = get_openapi(
+        title="Langchain FastAPI",
+        version="1.0.0",
+        description="API for chatbot",
+        routes=app.routes,
+    )
+
+    # Add BearerAuth to the components
+    openapi_schema["components"]["securitySchemes"] = {
+        "BearerAuth": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "JWT",
+        }
+    }
+
+    # Apply BearerAuth globally to all endpoints
+    openapi_schema["security"] = [{"BearerAuth": []}]
+    for path in openapi_schema["paths"].values():
+        for method in path.values():
+            method["security"] = [{"BearerAuth": []}]
+
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+# Override FastAPI's default OpenAPI schema
+app.openapi = custom_openapi
+
+
+
 # Include routers from different controllers
-app.include_router(auth_controller.router, prefix="/auth", tags=["Auth"])
-app.include_router(langchain_controller.router, prefix="/langchain", tags=["LangChain"])
-app.include_router(user_controller.router, prefix="/users", tags=["Users"])
+app.include_router(auth_controller.router, prefix="/api/auth", tags=["Auth"])
+app.include_router(langchain_controller.router, prefix="/api/langchain", tags=["LangChain"])
+app.include_router(user_controller.router, prefix="/api/users", tags=["Users"])
 
 
 DEBUG = os.getenv('DEBUG', 'False').lower() in ['true', '1', 't']
@@ -60,6 +107,6 @@ async def log_requests(request: Request, call_next):
     return response
 
 @app.get("/health")
-async def checkHealth():
+async def checkHealth(payload = Depends(validate_jwt)):
     logger.info("Health check endpoint was accessed.")
     return {"message": "healthy"}
