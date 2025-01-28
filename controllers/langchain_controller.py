@@ -5,10 +5,14 @@ from langchain.chat_models import ChatOpenAI
 from models.prompt_request import PromptRequest
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain, SequentialChain
+from langchain.memory import ConversationBufferMemory
+from langchain.chains import ConversationChain
 
 from limiter import limiter
 
 router = APIRouter()
+
+
 
 load_dotenv()  # Load environment variables from .env file
 
@@ -21,6 +25,12 @@ model = ChatOpenAI(
     verbose=True,                # Logs for debugging
     openai_api_key=os.getenv("OPENAI_API_KEY")
 )
+
+memory = ConversationBufferMemory()
+
+# Initialize the conversation chain with memory
+conversation = ConversationChain(llm=model, memory=memory)
+
 
 #
 #
@@ -61,6 +71,33 @@ async def get_langchain_with_instructions(request: Request, prompt_request: Prom
         print("Error:", e)
         raise HTTPException(status_code=500, detail="An error occurred while processing the request.")
 
+
+
+
+@router.post("/chat-with-memory")
+@limiter.limit("5/minute")
+async def get_langchain_with_memory(request: Request, prompt_request: PromptRequest):
+    try:
+
+        # Define a static system message
+        SYSTEM_MESSAGE = "You are chatbot that will help patients for stomatology clinics. Enforce Czech Language."
+
+        # Get the prompt from the request body
+        prompt = prompt_request.prompt
+
+        # Combine the system message with the user's prompt
+        combined_prompt = f"{SYSTEM_MESSAGE}\n\n{prompt}"
+
+        # Use the conversation chain to process the prompt
+        response = await conversation.apredict(input=combined_prompt)
+        
+        # Log the current conversation memory (optional, for debugging)
+        print("Memory contents:", memory.buffer)
+
+        return {"data": {"response": response}}
+    except Exception as e:
+        print("Error:", e)
+        raise HTTPException(status_code=500, detail="An error occurred while processing the request.")
 
 
 @router.post("/code-prompt")
