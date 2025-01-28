@@ -4,7 +4,7 @@ from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from controllers import auth_controller, langchain_controller, user_controller
+from controllers import auth_controller, langchain_controller, user_controller, deepseek_controller
 from slowapi.errors import RateLimitExceeded
 from limiter import limiter
 from fastapi.openapi.utils import get_openapi
@@ -43,12 +43,8 @@ async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
     logger.warning(f"Rate limit exceeded for {request.url}: {exc}")
     return PlainTextResponse(str(exc), status_code=429)
 
-
-
 # Define the HTTP Bearer dependency
 http_bearer = HTTPBearer()
-
-
 
 
 def custom_openapi():
@@ -84,12 +80,11 @@ def custom_openapi():
 # Override FastAPI's default OpenAPI schema
 app.openapi = custom_openapi
 
-
-
 # Include routers from different controllers
 app.include_router(auth_controller.router, prefix="/api/auth", tags=["Auth"])
 app.include_router(langchain_controller.router, prefix="/api/langchain", tags=["LangChain"])
 app.include_router(user_controller.router, prefix="/api/users", tags=["Users"])
+app.include_router(deepseek_controller.router, prefix="/api/deepseek", tags=["DeepSeek"])
 
 
 DEBUG = os.getenv('DEBUG', 'False').lower() in ['true', '1', 't']
