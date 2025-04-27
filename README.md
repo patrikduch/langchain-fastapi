@@ -18,6 +18,13 @@ Prepare virtualenv
 python -m venv myvenv  
 ```
 
+in case of compatibility issues
+
+```bash
+py -3.12 -m venv myvenv
+```
+
+
 Go to virtualevn
 
 On Windows:
@@ -52,4 +59,7 @@ uvicorn main:app --reload
 
 
 uvicorn main:app --reload --log-level debug
+
+
+
 
