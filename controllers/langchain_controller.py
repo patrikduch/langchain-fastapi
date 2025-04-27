@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException, Request
 from langchain.chat_models import ChatOpenAI
-from models.prompt_request import PromptRequest
+from models.requests.prompt_request import PromptRequest
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain, SequentialChain
 from langchain.memory import ConversationBufferMemory

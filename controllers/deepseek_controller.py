@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException
 import httpx
-from models.prompt_request import PromptRequest
+from models.requests.prompt_request import PromptRequest
 
 load_dotenv()
 
